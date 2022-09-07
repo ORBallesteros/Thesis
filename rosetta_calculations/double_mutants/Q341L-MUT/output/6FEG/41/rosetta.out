@@ -1,0 +1,1538 @@
+core.init: Checking for fconfig files in pwd and ./rosetta/flags 
+core.init: Rosetta version: rosetta.binary.linux.release-231 r231 2019.35+release.767c1ea 767c1ea25c572fbc078db45ad65dddb507240ad3 https://www.rosettacommons.org 2019-08-30T12:04:30.133343
+core.init: command: /scratch/oscarRB/ProyectoKv7.2/rosetta/software/main/source/bin/rosetta_scripts.static.linuxgccrelease -s /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb -parser:protocol /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/rosetta_scripts/flexddG.wt.xml -parser:script_vars soft_pack_sfxn=soft_rep_design.wts  chainstomove=A mutate_resfile_relpath=/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/C122Y.resfile number_backrub_trials=50000 max_minimization_iter=5000 backrub_trajectory_stride=5000 -in:file:fullatom -ignore_unrecognized_res -ignore_zero_occupancy -ex1 -ex2
+basic.random.init_random_generator: 'RNG device' seed mode, using '/dev/urandom', seed=63949802 seed_offset=0 real_seed=63949802
+basic.random.init_random_generator: RandomGenerator:init: Normal mode, seed=63949802 RG_type=mt19937
+core.init: Resolved executable path: /scratch/oscarRB/ProyectoKv7.2/rosetta/software/main/source/bin/rosetta_scripts.static.linuxgccrelease
+core.init: Looking for database based on location of executable: /scratch/oscarRB/ProyectoKv7.2/rosetta/software/main/database/
+protocols.jd2.PDBJobInputter: Instantiate PDBJobInputter
+protocols.jd2.PDBJobInputter: PDBJobInputter::fill_jobs
+protocols.jd2.PDBJobInputter: pushed /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb nstruct index 1
+protocols.evaluation.ChiWellRmsdEvaluatorCreator: Evaluation Creator active ... 
+protocols.jd2.PDBJobInputter: PDBJobInputter::pose_from_job
+protocols.jd2.PDBJobInputter: filling pose from PDB /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb
+core.chemical.GlobalResidueTypeSet: Finished initializing fa_standard residue type set.  Created 980 residue types
+core.chemical.GlobalResidueTypeSet: Total time to initialize 1.2 seconds.
+core.import_pose.import_pose: File '/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb' automatically determined to be of type PDB
+core.io.pose_from_sfr.PoseFromSFRBuilder: [ WARNING ] discarding 3 atoms at position 1 in file /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb. Best match rsd_type:  MET:NtermProteinFull
+protocols.rosetta_scripts.RosettaScriptsParser: dock_design_filename=/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/rosetta_scripts/flexddG.wt.xml
+protocols.rosetta_scripts.RosettaScriptsParser: Variable substitution will occur with the following values: '%%backrub_trajectory_stride%%'='5000';  '%%chainstomove%%'='A';  '%%max_minimization_iter%%'='5000';  '%%mutate_resfile_relpath%%'='/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/C122Y.resfile';  '%%number_backrub_trials%%'='50000';  '%%soft_pack_sfxn%%'='soft_rep_design.wts';  
+protocols.rosetta_scripts.RosettaScriptsParser: Substituted script:
+<ROSETTASCRIPTS>
+  <SCOREFXNS>
+    <ScoreFunction name="fa_ref2015" weights="ref2015"/>
+    <ScoreFunction name="fa_ref2015_cst" weights="ref2015">
+      <Reweight scoretype="atom_pair_constraint" weight="1.0"/>
+      <Set fa_max_dis="9.0"/>
+    </ScoreFunction>
+    <ScoreFunction name="sfxn_pack_soft" weights="soft_rep_design.wts" symmetric="1">
+      <Reweight scoretype="atom_pair_constraint" weight="1.0"/>
+    </ScoreFunction>
+  </SCOREFXNS>
+
+  <!-- ### Only required input file (other than PDB) - mutation resfile ### -->
+  <!-- #### All residues must be set to be NATAA packable at top of resfile ### -->
+  <TASKOPERATIONS>
+    <ReadResfile name="res_mutate" filename="/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/C122Y.resfile"/>
+  </TASKOPERATIONS>
+
+  <RESIDUE_SELECTORS>
+    <Task name="resselector" fixed="0" packable="0" designable="1" task_operations="res_mutate"/>
+    <Neighborhood name="bubble" selector="resselector" distance="8.0"/>
+    <PrimarySequenceNeighborhood name="bubble_adjacent" selector="bubble" lower="1" upper="1"/>
+    <StoredResidueSubset name="restore_neighbor_shell" subset_name="neighbor_shell"/>
+    <Not name="everythingelse" selector="restore_neighbor_shell"/>
+  </RESIDUE_SELECTORS>
+  <TASKOPERATIONS>
+    <OperateOnResidueSubset name="repackonly" selector="restore_neighbor_shell">
+      <RestrictToRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="norepack" selector="everythingelse">
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+    <UseMultiCoolAnnealer name="multicool" states="6"/>
+    <ExtraChiCutoff name="extrachizero" extrachi_cutoff="0"/>
+    <InitializeFromCommandline name="commandline_init"/>
+    <RestrictToRepacking name="restrict_to_repacking"/>
+  </TASKOPERATIONS>
+
+  <FILTERS>
+  </FILTERS>
+
+  <MOVERS>
+    <StoreResidueSubset name="neighbor_shell_storer" subset_name="neighbor_shell" residue_selector="bubble_adjacent" />
+
+    <AddConstraintsToCurrentConformationMover name="addcst" use_distance_cst="1" coord_dev="0.5" min_seq_sep="0" max_distance="9" CA_only="1" bound_width="0.0" cst_weight="0.0"/>
+    <ClearConstraintsMover name="clearcst"/>
+    <MinMover name="minimize" scorefxn="fa_ref2015_cst" chi="1" bb="1" type="lbfgs_armijo_nonmonotone" tolerance="0.000001" max_iter="5000"/>
+
+    <PackRotamersMover name="repack" scorefxn="fa_ref2015" task_operations="commandline_init,repackonly,norepack,multicool"/>
+    <PackRotamersMover name="mutate" scorefxn="fa_ref2015" task_operations="commandline_init,res_mutate,norepack,multicool"/>
+
+    <ReportToDB name="dbreport" batch_description="interface_ddG" database_name="ddG.db3">
+      <ScoreTypeFeatures/>
+      <ScoreFunctionFeatures scorefxn="fa_ref2015"/>
+      <StructureScoresFeatures scorefxn="fa_ref2015"/>
+    </ReportToDB>
+
+    <ReportToDB name="structreport" batch_description="interface_ddG_struct" database_name="struct.db3">
+      <PoseConformationFeatures/>
+      <PdbDataFeatures/>
+      <JobDataFeatures/>
+      <ResidueFeatures/>
+      <PoseCommentsFeatures/>
+      <ProteinResidueConformationFeatures/>
+      <ResidueConformationFeatures/>
+    </ReportToDB>
+
+    <SavePoseMover name="save_wt_bound_pose" restore_pose="0" reference_name="wt_bound_pose"/>
+    <SavePoseMover name="save_backrub_pose" restore_pose="0" reference_name="backrubpdb"/>
+    <SavePoseMover name="restore_backrub_pose" restore_pose="1" reference_name="backrubpdb"/>
+
+    <InterfaceDdGMover name="int_ddG_mover" wt_ref_savepose_mover="save_wt_bound_pose" chain_name="A" db_reporter="dbreport" scorefxn="fa_ref2015"/>
+
+    <ScoreMover name="apply_score" scorefxn="fa_ref2015_cst" verbose="0"/>
+
+    <!-- This ParsedProtocol allows the ddG calculation to take place multiple times along the backrub trajectory, if desired -->
+    <ParsedProtocol name="finish_ddg_post_backrub">
+      <Add mover_name="save_backrub_pose"/>
+      <Add mover_name="structreport"/>
+
+      <Add mover_name="repack"/>
+
+      <Add mover_name="addcst"/>
+      <Add mover_name="minimize"/>
+      <Add mover_name="clearcst"/>
+
+      <Add mover_name="save_wt_bound_pose"/>
+      <Add mover_name="structreport"/>
+      <Add mover_name="restore_backrub_pose"/>
+
+      <Add mover_name="mutate"/>
+
+      <Add mover_name="addcst"/>
+      <Add mover_name="minimize"/>
+      <Add mover_name="clearcst"/>
+      <Add mover_name="structreport"/>
+
+      <Add mover_name="int_ddG_mover"/>
+    </ParsedProtocol>
+
+    <BackrubProtocol name="backrub" mc_kt="1.2" ntrials="50000" pivot_residue_selector="restore_neighbor_shell" task_operations="restrict_to_repacking,commandline_init,extrachizero" recover_low="0" trajectory_stride="5000" trajectory_apply_mover="finish_ddg_post_backrub"/>
+
+  </MOVERS>
+  <APPLY_TO_POSE>
+  </APPLY_TO_POSE>
+  <PROTOCOLS>
+    <Add mover_name="addcst"/>
+    <Add mover_name="apply_score"/> <!-- Necessary to initialize neighbor graph -->
+    <Add mover_name="neighbor_shell_storer"/>
+
+    <Add mover_name="minimize"/>
+    <Add mover_name="clearcst"/>
+
+    <Add mover_name="backrub"/>
+  </PROTOCOLS>
+  <OUTPUT />
+</ROSETTASCRIPTS>
+protocols.rosetta_scripts.RosettaScriptsParser: Generating XML Schema for rosetta_scripts...
+protocols.rosetta_scripts.RosettaScriptsParser: ...done
+protocols.rosetta_scripts.RosettaScriptsParser: Initializing schema validator...
+protocols.rosetta_scripts.RosettaScriptsParser: ...done
+protocols.rosetta_scripts.RosettaScriptsParser: Validating input script...
+protocols.rosetta_scripts.RosettaScriptsParser: ...done
+protocols.rosetta_scripts.RosettaScriptsParser: Parsed script:
+<ROSETTASCRIPTS>
+	<SCOREFXNS>
+		<ScoreFunction name="fa_ref2015" weights="ref2015"/>
+		<ScoreFunction name="fa_ref2015_cst" weights="ref2015">
+			<Reweight scoretype="atom_pair_constraint" weight="1.0"/>
+			<Set fa_max_dis="9.0"/>
+		</ScoreFunction>
+		<ScoreFunction name="sfxn_pack_soft" symmetric="1" weights="soft_rep_design.wts">
+			<Reweight scoretype="atom_pair_constraint" weight="1.0"/>
+		</ScoreFunction>
+	</SCOREFXNS>
+	<TASKOPERATIONS>
+		<ReadResfile filename="/scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/C122Y.resfile" name="res_mutate"/>
+	</TASKOPERATIONS>
+	<RESIDUE_SELECTORS>
+		<Task designable="1" fixed="0" name="resselector" packable="0" task_operations="res_mutate"/>
+		<Neighborhood distance="8.0" name="bubble" selector="resselector"/>
+		<PrimarySequenceNeighborhood lower="1" name="bubble_adjacent" selector="bubble" upper="1"/>
+		<StoredResidueSubset name="restore_neighbor_shell" subset_name="neighbor_shell"/>
+		<Not name="everythingelse" selector="restore_neighbor_shell"/>
+	</RESIDUE_SELECTORS>
+	<TASKOPERATIONS>
+		<OperateOnResidueSubset name="repackonly" selector="restore_neighbor_shell">
+			<RestrictToRepackingRLT/>
+		</OperateOnResidueSubset>
+		<OperateOnResidueSubset name="norepack" selector="everythingelse">
+			<PreventRepackingRLT/>
+		</OperateOnResidueSubset>
+		<UseMultiCoolAnnealer name="multicool" states="6"/>
+		<ExtraChiCutoff extrachi_cutoff="0" name="extrachizero"/>
+		<InitializeFromCommandline name="commandline_init"/>
+		<RestrictToRepacking name="restrict_to_repacking"/>
+	</TASKOPERATIONS>
+	<FILTERS/>
+	<MOVERS>
+		<StoreResidueSubset name="neighbor_shell_storer" residue_selector="bubble_adjacent" subset_name="neighbor_shell"/>
+		<AddConstraintsToCurrentConformationMover CA_only="1" bound_width="0.0" coord_dev="0.5" cst_weight="0.0" max_distance="9" min_seq_sep="0" name="addcst" use_distance_cst="1"/>
+		<ClearConstraintsMover name="clearcst"/>
+		<MinMover bb="1" chi="1" max_iter="5000" name="minimize" scorefxn="fa_ref2015_cst" tolerance="0.000001" type="lbfgs_armijo_nonmonotone"/>
+		<PackRotamersMover name="repack" scorefxn="fa_ref2015" task_operations="commandline_init,repackonly,norepack,multicool"/>
+		<PackRotamersMover name="mutate" scorefxn="fa_ref2015" task_operations="commandline_init,res_mutate,norepack,multicool"/>
+		<ReportToDB batch_description="interface_ddG" database_name="ddG.db3" name="dbreport">
+			<ScoreTypeFeatures/>
+			<ScoreFunctionFeatures scorefxn="fa_ref2015"/>
+			<StructureScoresFeatures scorefxn="fa_ref2015"/>
+		</ReportToDB>
+		<ReportToDB batch_description="interface_ddG_struct" database_name="struct.db3" name="structreport">
+			<PoseConformationFeatures/>
+			<PdbDataFeatures/>
+			<JobDataFeatures/>
+			<ResidueFeatures/>
+			<PoseCommentsFeatures/>
+			<ProteinResidueConformationFeatures/>
+			<ResidueConformationFeatures/>
+		</ReportToDB>
+		<SavePoseMover name="save_wt_bound_pose" reference_name="wt_bound_pose" restore_pose="0"/>
+		<SavePoseMover name="save_backrub_pose" reference_name="backrubpdb" restore_pose="0"/>
+		<SavePoseMover name="restore_backrub_pose" reference_name="backrubpdb" restore_pose="1"/>
+		<InterfaceDdGMover chain_name="A" db_reporter="dbreport" name="int_ddG_mover" scorefxn="fa_ref2015" wt_ref_savepose_mover="save_wt_bound_pose"/>
+		<ScoreMover name="apply_score" scorefxn="fa_ref2015_cst" verbose="0"/>
+		<ParsedProtocol name="finish_ddg_post_backrub">
+			<Add mover_name="save_backrub_pose"/>
+			<Add mover_name="structreport"/>
+			<Add mover_name="repack"/>
+			<Add mover_name="addcst"/>
+			<Add mover_name="minimize"/>
+			<Add mover_name="clearcst"/>
+			<Add mover_name="save_wt_bound_pose"/>
+			<Add mover_name="structreport"/>
+			<Add mover_name="restore_backrub_pose"/>
+			<Add mover_name="mutate"/>
+			<Add mover_name="addcst"/>
+			<Add mover_name="minimize"/>
+			<Add mover_name="clearcst"/>
+			<Add mover_name="structreport"/>
+			<Add mover_name="int_ddG_mover"/>
+		</ParsedProtocol>
+		<BackrubProtocol mc_kt="1.2" name="backrub" ntrials="50000" pivot_residue_selector="restore_neighbor_shell" recover_low="0" task_operations="restrict_to_repacking,commandline_init,extrachizero" trajectory_apply_mover="finish_ddg_post_backrub" trajectory_stride="5000"/>
+	</MOVERS>
+	<APPLY_TO_POSE/>
+	<PROTOCOLS>
+		<Add mover_name="addcst"/>
+		<Add mover_name="apply_score"/>
+		<Add mover_name="neighbor_shell_storer"/>
+		<Add mover_name="minimize"/>
+		<Add mover_name="clearcst"/>
+		<Add mover_name="backrub"/>
+	</PROTOCOLS>
+	<OUTPUT/>
+</ROSETTASCRIPTS>
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+core.scoring.etable: Starting energy table calculation
+core.scoring.etable: smooth_etable: changing atr/rep split to bottom of energy well
+core.scoring.etable: smooth_etable: spline smoothing lj etables (maxdis = 6)
+core.scoring.etable: smooth_etable: spline smoothing solvation etables (max_dis = 6)
+core.scoring.etable: Finished calculating energy tables.
+basic.io.database: Database file opened: scoring/score_functions/hbonds/ref2015_params/HBPoly1D.csv
+basic.io.database: Database file opened: scoring/score_functions/hbonds/ref2015_params/HBFadeIntervals.csv
+basic.io.database: Database file opened: scoring/score_functions/hbonds/ref2015_params/HBEval.csv
+basic.io.database: Database file opened: scoring/score_functions/hbonds/ref2015_params/DonStrength.csv
+basic.io.database: Database file opened: scoring/score_functions/hbonds/ref2015_params/AccStrength.csv
+basic.io.database: Database file opened: scoring/score_functions/rama/fd/all.ramaProb
+basic.io.database: Database file opened: scoring/score_functions/rama/fd/prepro.ramaProb
+basic.io.database: Database file opened: scoring/score_functions/omega/omega_ppdep.all.txt
+basic.io.database: Database file opened: scoring/score_functions/omega/omega_ppdep.gly.txt
+basic.io.database: Database file opened: scoring/score_functions/omega/omega_ppdep.pro.txt
+basic.io.database: Database file opened: scoring/score_functions/omega/omega_ppdep.valile.txt
+basic.io.database: Database file opened: scoring/score_functions/P_AA_pp/P_AA
+basic.io.database: Database file opened: scoring/score_functions/P_AA_pp/P_AA_n
+core.scoring.P_AA: shapovalov_lib::shap_p_aa_pp_smooth_level of 1( aka low_smooth ) got activated.
+basic.io.database: Database file opened: scoring/score_functions/P_AA_pp/shapovalov/10deg/kappa131/a20.prop
+core.scoring.etable: Starting energy table calculation
+core.scoring.etable: smooth_etable: changing atr/rep split to bottom of energy well
+core.scoring.etable: smooth_etable: spline smoothing lj etables (maxdis = 6)
+core.scoring.etable: smooth_etable: spline smoothing solvation etables (max_dis = 6)
+core.scoring.etable: Finished calculating energy tables.
+basic.io.database: Database file opened: scoring/score_functions/PairEPotential/pdb_pair_stats_fine
+basic.io.database: Database file opened: scoring/score_functions/InterchainPotential/interchain_env_log.txt
+basic.io.database: Database file opened: scoring/score_functions/InterchainPotential/interchain_pair_log.txt
+basic.io.database: Database file opened: scoring/score_functions/EnvPairPotential/env_log.txt
+basic.io.database: Database file opened: scoring/score_functions/EnvPairPotential/cbeta_den.txt
+basic.io.database: Database file opened: scoring/score_functions/EnvPairPotential/pair_log.txt
+basic.io.database: Database file opened: scoring/score_functions/EnvPairPotential/cenpack_log.txt
+core.scoring.ramachandran: shapovalov_lib::shap_rama_smooth_level of 4( aka highest_smooth ) got activated.
+basic.io.database: Database file opened: scoring/score_functions/rama/shapovalov/kappa25/all.ramaProb
+protocols.jd2.parser.ScoreFunctionLoader: defined score function "fa_ref2015" with weights "ref2015"
+protocols.jd2.parser.ScoreFunctionLoader: defined score function "fa_ref2015_cst" with weights "ref2015"
+protocols.jd2.parser.ScoreFunctionLoader:  setting fa_ref2015_cst weight atom_pair_constraint to 1
+core.scoring.etable: Starting energy table calculation
+core.scoring.etable: smooth_etable: changing atr/rep split to bottom of energy well
+core.scoring.etable: smooth_etable: spline smoothing lj etables (maxdis = 9)
+core.scoring.etable: smooth_etable: spline smoothing solvation etables (max_dis = 9)
+core.scoring.etable: Finished calculating energy tables.
+protocols.jd2.parser.ScoreFunctionLoader: defined score function "sfxn_pack_soft" with weights "soft_rep_design.wts"
+protocols.jd2.parser.ScoreFunctionLoader:  setting sfxn_pack_soft weight atom_pair_constraint to 1
+protocols.jd2.parser.ScoreFunctionLoader: Scorefunction tag contains 'symmetric' option. This is no longer needed.
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "res_mutate" of type ReadResfile
+protocols.residue_selectors.TaskSelector: Adding task operation res_mutate
+core.select.residue_selector.PrimarySequenceNeighborhoodSelector: Using residue selector bubble
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "repackonly" of type OperateOnResidueSubset
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "norepack" of type OperateOnResidueSubset
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "multicool" of type UseMultiCoolAnnealer
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "extrachizero" of type ExtraChiCutoff
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "commandline_init" of type InitializeFromCommandline
+protocols.jd2.parser.TaskOperationLoader: Defined TaskOperation named "restrict_to_repacking" of type RestrictToRepacking
+core.select.residue_selector.util: Found residue selector bubble_adjacent
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "neighbor_shell_storer" of type StoreResidueSubset
+core.select.residue_selector.util: [ WARNING ] Selector name is empty!
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "addcst" of type AddConstraintsToCurrentConformationMover
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "clearcst" of type ClearConstraintsMover
+protocols.minimization_packing.MinMover: Options chi, bb: 1, 1 omega: 1
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "minimize" of type MinMover
+core.pack.task.xml_util: Object repack reading the following task_operations: Adding the following task operations
+commandline_init repackonly norepack multicool 
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "repack" of type PackRotamersMover
+core.pack.task.xml_util: Object mutate reading the following task_operations: Adding the following task operations
+commandline_init res_mutate norepack multicool 
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "mutate" of type PackRotamersMover
+protocols.RosettaScripts.util: Invoking basic::database::parse_database_connection
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "dbreport" of type ReportToDB
+protocols.RosettaScripts.util: Invoking basic::database::parse_database_connection
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "structreport" of type ReportToDB
+core.pose.ref_pose: Loading PDB: wt_bound_pose
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "save_wt_bound_pose" of type SavePoseMover
+core.pose.ref_pose: Loading PDB: backrubpdb
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "save_backrub_pose" of type SavePoseMover
+core.pose.ref_pose: Loading PDB: backrubpdb
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "restore_backrub_pose" of type SavePoseMover
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "int_ddG_mover" of type InterfaceDdGMover
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "apply_score" of type ScoreMover
+protocols.rosetta_scripts.ParsedProtocol: ParsedProtocol mover with the following movers and filters
+protocols.rosetta_scripts.ParsedProtocol: added mover "save_backrub_pose" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "structreport" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "repack" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "addcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "minimize" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "clearcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "save_wt_bound_pose" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "structreport" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "restore_backrub_pose" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "mutate" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "addcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "minimize" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "clearcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "structreport" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "int_ddG_mover" with filter "true_filter"
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "finish_ddg_post_backrub" of type ParsedProtocol
+core.mm.MMBondAngleLibrary: MM bond angle sets added fully assigned: 603; wildcard: 0 and 1 virtual parameter.
+core.pack.dunbrack.RotamerLibrary: shapovalov_lib_fixes_enable option is true.
+core.pack.dunbrack.RotamerLibrary: shapovalov_lib::shap_dun10_smooth_level of 1( aka lowest_smooth ) got activated.
+core.pack.dunbrack.RotamerLibrary: Binary rotamer library selected: /scratch/oscarRB/ProyectoKv7.2/rosetta/software/main/database/rotamer/shapovalov/StpDwn_0-0-0/Dunbrack10.lib.bin
+core.pack.dunbrack.RotamerLibrary: Using Dunbrack library binary file '/scratch/oscarRB/ProyectoKv7.2/rosetta/software/main/database/rotamer/shapovalov/StpDwn_0-0-0/Dunbrack10.lib.bin'.
+core.pack.dunbrack.RotamerLibrary: Dunbrack 2010 library took 0.23 seconds to load from binary
+core.pack.task.xml_util: Object backrub reading the following task_operations: Adding the following task operations
+restrict_to_repacking commandline_init extrachizero 
+core.select.residue_selector.util: Found residue selector restore_neighbor_shell
+protocols.rosetta_scripts.RosettaScriptsParser: Defined mover named "backrub" of type BackrubProtocol
+protocols.rosetta_scripts.ParsedProtocol: ParsedProtocol mover with the following movers and filters
+protocols.rosetta_scripts.ParsedProtocol: added mover "addcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "apply_score" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "neighbor_shell_storer" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "minimize" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "clearcst" with filter "true_filter"
+protocols.rosetta_scripts.ParsedProtocol: added mover "backrub" with filter "true_filter"
+protocols.jd2.PDBJobInputter: PDBJobInputter::pose_from_job
+protocols.jd2.PDBJobInputter: filling pose from saved copy /scratch/oscarRB/ProyectoKv7.2/rosetta/Q341L-MUT/inputs/6FEG/6FEG.pdb
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ScoreMover - apply_score=======================
+basic.io.database: Database file opened: scoring/score_functions/elec_cp_reps.dat
+core.scoring.elec.util: Read 40 countpair representative atoms
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER StoreResidueSubset - neighbor_shell_storer=======================
+core.select.residue_selector.PrimarySequenceNeighborhoodSelector: ]
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER BackrubProtocol - backrub=======================
+core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
+basic.io.database: Database file opened: sampling/branch_angle/branch_angle_1.txt
+basic.io.database: Database file opened: sampling/branch_angle/branch_angle_2.txt
+protocols.backrub.BackrubMover: Segment lengths: 3-34 atoms
+protocols.backrub.BackrubMover: Main chain pivot atoms: CA
+protocols.backrub.BackrubMover: Adding backrub segments for residues 43-56
+protocols.backrub.BackrubMover: Adding backrub segments for residues 223-225
+protocols.backrub.BackrubMover: Adding backrub segments for residues 227-232
+protocols.backrub.BackrubMover: Adding backrub segments for residues 238-240
+protocols.backrub.BackrubMover: Adding backrub segments for residues 259-261
+protocols.backrub.BackrubMover: Total Segments Added: 112
+protocols.backrub.BackrubProtocol: Score After PDB Load:
+protocols.backrub.BackrubProtocol: 
+------------------------------------------------------------
+ Scores                       Weight   Raw Score Wghtd.Score
+------------------------------------------------------------
+ fa_atr                       1.000   -1189.881   -1189.881
+ fa_rep                       0.550     165.054      90.780
+ fa_sol                       1.000     886.265     886.265
+ fa_intra_rep                 0.005     474.896       2.374
+ fa_intra_sol_xover4          1.000      60.272      60.272
+ lk_ball_wtd                  1.000     -26.583     -26.583
+ mm_bend                      1.000     414.830     414.830
+ fa_elec                      1.000    -460.456    -460.456
+ pro_close                    1.250       0.960       1.199
+ hbond_sr_bb                  1.000    -102.256    -102.256
+ hbond_lr_bb                  1.000     -10.213     -10.213
+ hbond_bb_sc                  1.000     -33.439     -33.439
+ hbond_sc                     1.000     -43.482     -43.482
+ dslf_fa13                    1.250       0.000       0.000
+ omega                        0.400     134.887      53.955
+ fa_dun                       0.700     603.369     422.358
+ p_aa_pp                      0.600     -54.400     -32.640
+ yhh_planarity                0.625       0.199       0.124
+ ref                          1.000      33.956      33.956
+ rama_prepro                  0.450     140.086      63.039
+---------------------------------------------------
+ Total weighted score:                      130.202
+core.pack.task: Packer task: initialize from command line() 
+core.pack.task.operation.TaskOperations: Enabling extrachi cutoff at all positions
+protocols.backrub.BackrubProtocol: Score After Branch Angle Optimization/Side Chain Idealization:
+protocols.backrub.BackrubProtocol: 
+------------------------------------------------------------
+ Scores                       Weight   Raw Score Wghtd.Score
+------------------------------------------------------------
+ fa_atr                       1.000   -1203.073   -1203.073
+ fa_rep                       0.550     249.928     137.461
+ fa_sol                       1.000     885.389     885.389
+ fa_intra_rep                 0.005     592.393       2.962
+ fa_intra_sol_xover4          1.000      66.741      66.741
+ lk_ball_wtd                  1.000     -26.668     -26.668
+ mm_bend                      1.000     396.621     396.621
+ fa_elec                      1.000    -456.274    -456.274
+ pro_close                    1.250       0.960       1.199
+ hbond_sr_bb                  1.000    -101.079    -101.079
+ hbond_lr_bb                  1.000     -10.213     -10.213
+ hbond_bb_sc                  1.000     -30.796     -30.796
+ hbond_sc                     1.000     -34.035     -34.035
+ dslf_fa13                    1.250       0.000       0.000
+ omega                        0.400     134.887      53.955
+ fa_dun                       0.700     603.369     422.358
+ p_aa_pp                      0.600     -54.400     -32.640
+ yhh_planarity                0.625       0.199       0.124
+ ref                          1.000      33.956      33.956
+ rama_prepro                  0.450     140.086      63.039
+---------------------------------------------------
+ Total weighted score:                      169.025
+core.pack.task: Packer task: initialize from command line() 
+core.pack.task.operation.TaskOperations: Enabling extrachi cutoff at all positions
+protocols.backrub.BackrubProtocol: Running 50000 trials...
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 5000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.util: Requesting data on 'structreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='0' and batch_id='0'
+protocols.features.ProtocolFeatures: No protocol ID, generating one automagically
+protocols.features.BatchFeatures: No batch ID, generating one automagically
+protocols.features.util: protocol_id '1' and batch_id '1', for batch 'structreport' have been written to the database. Now sending info back to head node.
+basic.mpi.DbMoverMessageListener: Received this message from slave: 1 structreport 1
+basic.mpi.DbMoverMessageListener: Setting batch id identifier to: 'structreport'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 861 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.util: Requesting data on 'structreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='1'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 841 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.util: Requesting data on 'structreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='1'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 3.28681
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.util: Requesting data on 'bound_wt_dbreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='0'
+protocols.features.BatchFeatures: No batch ID, generating one automagically
+protocols.features.util: protocol_id '1' and batch_id '1', for batch 'bound_wt_dbreport' have been written to the database. Now sending info back to head node.
+basic.mpi.DbMoverMessageListener: Received this message from slave: 1 bound_wt_dbreport 1
+basic.mpi.DbMoverMessageListener: Setting batch id identifier to: 'bound_wt_dbreport'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.util: Requesting data on 'unbound_wt_dbreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='0'
+protocols.features.BatchFeatures: No batch ID, generating one automagically
+protocols.features.util: protocol_id '1' and batch_id '2', for batch 'unbound_wt_dbreport' have been written to the database. Now sending info back to head node.
+basic.mpi.DbMoverMessageListener: Received this message from slave: 1 unbound_wt_dbreport 2
+basic.mpi.DbMoverMessageListener: Setting batch id identifier to: 'unbound_wt_dbreport'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.util: Requesting data on 'bound_mut_dbreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='0'
+protocols.features.BatchFeatures: No batch ID, generating one automagically
+protocols.features.util: protocol_id '1' and batch_id '3', for batch 'bound_mut_dbreport' have been written to the database. Now sending info back to head node.
+basic.mpi.DbMoverMessageListener: Received this message from slave: 1 bound_mut_dbreport 3
+basic.mpi.DbMoverMessageListener: Setting batch id identifier to: 'bound_mut_dbreport'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.util: Requesting data on 'unbound_mut_dbreport' from the DATABASE_PROTOCOL_AND_BATCH_ID_TAG message listener on head node.
+protocols.features.util: Received protocol_id='1' and batch_id='0'
+protocols.features.BatchFeatures: No batch ID, generating one automagically
+protocols.features.util: protocol_id '1' and batch_id '4', for batch 'unbound_mut_dbreport' have been written to the database. Now sending info back to head node.
+basic.mpi.DbMoverMessageListener: Received this message from slave: 1 unbound_mut_dbreport 4
+basic.mpi.DbMoverMessageListener: Setting batch id identifier to: 'unbound_mut_dbreport'
+protocols.features.util: Done with protocol and batch id generation.
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 10000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 889 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 851 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 6.61631
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.ProtocolFeatures: Writing to protocols table with given protocol id: 1
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 15000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 1016 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 972 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 1.96288
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 20000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 938 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 950 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 2.3592
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 25000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 918 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 905 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 4.94184
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 30000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 985 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 1003 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 8.22751
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 35000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 873 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 917 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 4.23225
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 40000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 962 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 901 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 7.35509
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 45000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 866 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 841 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 5.30455
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.backrub.BackrubProtocol: Applying mover 'ParsedProtocol' on step 50000
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - repack=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 938 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating DensePDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - save_wt_bound_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER SavePoseMover - restore_backrub_pose=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER PackRotamersMover - mutate=======================
+core.pack.task: Packer task: initialize from command line() 
+core.pack.pack_rotamers: built 908 rotamers at 29 positions.
+core.pack.interaction_graph.interaction_graph_factory: Instantiating PDInteractionGraph
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER AddConstraintsToCurrentConformationMover - addcst=======================
+protocols.constraint_movers.AddConstraintsToCurrentConformationMover: Using harmonic function
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER MinMover - minimize=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ClearConstraintsMover - clearcst=======================
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER ReportToDB - structreport=======================
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'structreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting PoseConformationFeatures
+protocols.features.ReportToDB: Reporting PdbDataFeatures
+protocols.features.ReportToDB: Reporting JobDataFeatures
+protocols.features.ReportToDB: Reporting ResidueFeatures
+protocols.features.ReportToDB: Reporting PoseCommentsFeatures
+protocols.features.ReportToDB: Reporting ProteinResidueConformationFeatures
+protocols.features.ReportToDB: Reporting ResidueConformationFeatures
+protocols.rosetta_scripts.ParsedProtocol: =======================BEGIN MOVER InterfaceDdGMover - int_ddG_mover=======================
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Translating/unbinding (inverted because we can't move the first chain) chain ID(s): 2 3 
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -18.6379 -3.77833 64.8937  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.864549 -0.502029 -0.0228652 -0.456179 -0.764875 -0.454826 0.210847 0.40365 -0.890287 -504.331 -560.572 -608.963  
+core.pose.util: [ WARNING ] get_jump_id_from_chain_id(): Chain 3 has multiple jumps, returning the lowest number one.
+protocols.moves.RigidBodyMover: Translate: Jump (before): RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -1.10148 14.9789 57.0148  
+protocols.moves.RigidBodyMover: Translate: Jump (after):  RT 0.227311 0.622974 0.748487 0.844491 -0.508849 0.167053 0.484937 0.594118 -0.641763 -486.794 -541.815 -616.842  
+protocols.features.InterfaceDdGMover: Mutations between stored wildtype and mutant poses:
+ResNum WTResiType MutResiType
+    48     GLN        LEU   
+    51     TRP        ARG   
+
+protocols.features.InterfaceDdGMover: interface binding energy ddG score (after mutation(s)): 5.43475
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_wt_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'bound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.features.ReportToDB: Reporting features for 265 of the 265 total residues in the pose 6FEG_0001 for batch 'unbound_mut_dbreport'.
+protocols.features.ProtocolFeatures: Checking for existing protocol entry with given id
+protocols.features.BatchFeatures: Checking for existing batches entry with given id
+protocols.features.ReportToDB: Reporting ScoreTypeFeatures
+protocols.features.ReportToDB: Reporting ScoreFunctionFeatures
+protocols.features.ReportToDB: Reporting StructureScoresFeatures
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.moves.TrialCounter:      br_CA_CA_04 trials=   8034;  accepts= 0.4755;  energy_drop/trial=   0.00115
+protocols.moves.TrialCounter:      br_CA_CA_07 trials=   6289;  accepts= 0.4039;  energy_drop/trial=   0.00445
+protocols.moves.TrialCounter:      br_CA_CA_10 trials=   4631;  accepts= 0.4522;  energy_drop/trial=  -0.00101
+protocols.moves.TrialCounter:      br_CA_CA_13 trials=   4100;  accepts= 0.2995;  energy_drop/trial=  -0.00289
+protocols.moves.TrialCounter:      br_CA_CA_16 trials=   3349;  accepts= 0.2631;  energy_drop/trial=  -0.00242
+protocols.moves.TrialCounter:      br_CA_CA_19 trials=   2696;  accepts= 0.3108;  energy_drop/trial=   0.00041
+protocols.moves.TrialCounter:      br_CA_CA_22 trials=   2312;  accepts= 0.2781;  energy_drop/trial=   0.00056
+protocols.moves.TrialCounter:      br_CA_CA_25 trials=   2012;  accepts= 0.2376;  energy_drop/trial=  -0.01203
+protocols.moves.TrialCounter:      br_CA_CA_28 trials=   1708;  accepts= 0.2494;  energy_drop/trial=   0.01091
+protocols.moves.TrialCounter:      br_CA_CA_31 trials=   1365;  accepts= 0.2418;  energy_drop/trial=  -0.00757
+protocols.moves.TrialCounter:      br_CA_CA_34 trials=    957;  accepts= 0.2487;  energy_drop/trial=   0.01180
+protocols.moves.TrialCounter:       sc_chi_rot trials=  11283;  accepts= 0.3769;  energy_drop/trial=   0.00895
+protocols.moves.TrialCounter:      sc_chi_unif trials=   1264;  accepts= 0.0356;  energy_drop/trial=   0.03651
+protocols.backrub.BackrubProtocol: Last Score:
+protocols.backrub.BackrubProtocol: 
+------------------------------------------------------------
+ Scores                       Weight   Raw Score Wghtd.Score
+------------------------------------------------------------
+ fa_atr                       1.000   -1183.362   -1183.362
+ fa_rep                       0.550     305.375     167.956
+ fa_sol                       1.000     849.597     849.597
+ fa_intra_rep                 0.005     600.125       3.001
+ fa_intra_sol_xover4          1.000      63.163      63.163
+ lk_ball_wtd                  1.000     -37.274     -37.274
+ mm_bend                      1.000     389.663     389.663
+ fa_elec                      1.000    -359.597    -359.597
+ pro_close                    1.250       0.960       1.199
+ hbond_sr_bb                  1.000     -98.806     -98.806
+ hbond_lr_bb                  1.000     -10.198     -10.198
+ hbond_bb_sc                  1.000     -16.200     -16.200
+ hbond_sc                     1.000     -11.714     -11.714
+ dslf_fa13                    1.250       0.000       0.000
+ omega                        0.400     136.589      54.636
+ fa_dun                       0.700     625.636     437.945
+ p_aa_pp                      0.600     -50.739     -30.444
+ yhh_planarity                0.625       4.125       2.578
+ ref                          1.000      33.956      33.956
+ rama_prepro                  0.450     156.498      70.424
+---------------------------------------------------
+ Total weighted score:                      326.524
+protocols.backrub.BackrubProtocol: Low Score:
+protocols.backrub.BackrubProtocol: 
+------------------------------------------------------------
+ Scores                       Weight   Raw Score Wghtd.Score
+------------------------------------------------------------
+ fa_atr                       1.000   -1202.800   -1202.800
+ fa_rep                       0.550     244.020     134.211
+ fa_sol                       1.000     881.651     881.651
+ fa_intra_rep                 0.005     597.309       2.987
+ fa_intra_sol_xover4          1.000      67.006      67.006
+ lk_ball_wtd                  1.000     -27.482     -27.482
+ mm_bend                      1.000     394.912     394.912
+ fa_elec                      1.000    -451.293    -451.293
+ pro_close                    1.250       0.960       1.199
+ hbond_sr_bb                  1.000    -101.016    -101.016
+ hbond_lr_bb                  1.000     -10.213     -10.213
+ hbond_bb_sc                  1.000     -30.796     -30.796
+ hbond_sc                     1.000     -33.014     -33.014
+ dslf_fa13                    1.250       0.000       0.000
+ omega                        0.400     134.816      53.926
+ fa_dun                       0.700     600.342     420.240
+ p_aa_pp                      0.600     -55.168     -33.101
+ yhh_planarity                0.625       0.199       0.124
+ ref                          1.000      33.956      33.956
+ rama_prepro                  0.450     144.140      64.863
+---------------------------------------------------
+ Total weighted score:                      165.360
+protocols.backrub.BackrubProtocol: Leaving pose as last sampled model
+protocols.rosetta_scripts.ParsedProtocol: setting status to success
+protocols.jd2.JobDistributor: 6FEG_0001 reported success in 4458 seconds
+protocols.jd2.JobDistributor: no more batches to process... 
+protocols.jd2.JobDistributor: 1 jobs considered, 1 jobs attempted in 4459 seconds
+SEQUENCE: 
+SCORE: total_score dslf_fa13    fa_atr    fa_dun   fa_elec fa_intra_rep fa_intra_sol_xover4              fa_rep              fa_sol hbond_bb_sc hbond_lr_bb    hbond_sc hbond_sr_bb lk_ball_wtd       omega     p_aa_pp pro_close rama_prepro         ref yhh_planarity description 
+SCORE:     -63.139     0.000 -1183.362   437.945  -359.597        3.001              63.163             167.956             849.597     -16.200     -10.198     -11.714     -98.806     -37.274      54.636     -30.444     1.199      70.424      33.956         2.578 6FEG_0001
+SCORE:    -133.981     0.000 -1184.455   438.166  -408.187        3.015              63.207             148.199             864.122     -27.917     -10.781     -25.275     -97.288             0.000     -30.997      54.055              0.000            -30.798     1.199      74.292      33.956         1.504 1_0001
+SCORE:     -80.487     0.000 -1179.465   443.705  -373.704        3.046              65.044             148.366             852.913     -19.750     -10.536     -14.782     -97.532             0.000     -31.129      53.408              0.000            -30.096     1.199      71.597      33.956         3.274 10_0001
+SCORE:    -343.081     0.000 -1209.741   347.320  -417.613        2.868              63.855             114.746             862.344     -28.522     -10.584     -25.379    -103.368             0.000     -38.686      48.809              0.000            -42.338     1.092      56.051      33.956         2.112 11_0001
+SCORE:    -328.314     0.000 -1205.140   347.646  -417.030        2.883              63.882             118.032             857.660     -26.812     -10.861     -28.241    -102.445             0.000     -38.486      50.364              0.000            -40.178     1.071      62.084      34.713         2.546 12_0001
+SCORE:    -102.129     0.000 -1173.786   425.750  -362.573        3.023              62.813             142.709             843.934     -19.268     -10.404     -10.391    -101.121             0.000     -36.295      53.871              0.000            -30.340     1.199      72.417      33.956         2.375 13_0001
+SCORE:    -370.075     0.000 -1207.944   336.185  -410.053        2.835              60.924             107.693             856.080     -32.793     -10.679     -22.136    -104.827             0.000     -41.254      46.053              0.000            -42.138     1.149      55.737      33.956         1.136 14_0001
+SCORE:    -357.956     0.000 -1203.281   334.540  -405.656        2.847              60.996             109.459             851.978     -31.459     -10.900     -21.237    -103.790             0.000     -41.416      48.132              0.000            -41.574     1.158      56.042      34.713         1.492 15_0001
+SCORE:     -65.305     0.000 -1179.517   446.262  -361.387        3.044              62.812             161.772             841.705     -15.549     -10.585     -12.360     -97.808             0.000     -34.970      54.622              0.000            -30.672     1.199      70.372      33.956         1.799 16_0001
+SCORE:    -342.425     0.000 -1201.996   347.962  -401.218        2.774              61.459             110.924             847.445     -28.163     -10.362     -21.649    -103.813             0.000     -38.839      44.867              0.000            -40.947     1.070      53.006      33.956         1.099 17_0001
+SCORE:    -332.868     0.000 -1197.428   346.202  -396.599        2.793              61.654             113.374             843.291     -26.441     -10.561     -20.241    -103.226             0.000     -40.491      46.713              0.000            -41.194     1.036      52.494      34.713         1.044 18_0001
+SCORE:     -66.524     0.000 -1162.937   445.364  -349.216        3.160              60.074             154.294             825.062     -18.407     -10.524      -9.635    -100.019             0.000     -35.377      54.323              0.000            -30.992     1.199      69.811      33.956         3.339 19_0001
+SCORE:    -333.559     0.000 -1206.576   369.952  -432.587        2.864              62.589             108.596             872.650     -33.585     -10.728     -32.470    -103.860             0.000     -35.885      45.329              0.000            -38.487     1.089      62.217      33.956         1.379 2_0001
+SCORE:    -347.724     0.000 -1195.182   342.138  -390.806        2.827              58.018             107.544             838.606     -27.390     -10.351     -19.869    -104.646             0.000     -42.675      43.488              0.000            -40.028     0.959      53.894      33.956         1.793 20_0001
+SCORE:    -330.228     0.000 -1190.307   345.511  -387.205        2.853              58.681             111.343             835.179     -26.632     -10.231     -18.721    -104.159             0.000     -42.662      44.050              0.000            -39.289     0.966      53.554      34.713         2.129 21_0001
+SCORE:     -76.913     0.000 -1163.503   427.578  -341.436        2.943              59.159             153.457             826.563     -15.090      -9.912      -8.359     -95.297             0.000     -37.543      54.842              0.000            -32.549     1.199      63.563      33.956         3.518 22_0001
+SCORE:    -341.829     0.000 -1193.792   339.943  -390.984        2.809              57.898             109.515             835.692     -25.229     -10.326     -18.593    -104.245             0.000     -45.283      43.548              0.000            -39.354     0.930      59.706      33.956         1.980 23_0001
+SCORE:    -334.453     0.000 -1189.305   335.485  -388.143        2.810              57.741             108.762             834.470     -22.618     -10.500     -18.872    -105.007             0.000     -45.081      45.804              0.000            -38.833     0.915      60.798      34.713         2.407 24_0001
+SCORE:     -53.128     0.000 -1172.552   448.074  -370.601        3.082              60.169             161.571             854.492     -17.281     -10.615     -11.247     -96.401             0.000     -34.613      53.614              0.000            -29.613     1.199      71.637      33.956         2.000 25_0001
+SCORE:    -361.241     0.000 -1204.350   344.041  -414.669        2.831              58.046             109.180             860.635     -28.964     -10.713     -25.639    -104.912             0.000     -42.308      45.849              0.000            -39.355     0.954      53.009      33.956         1.168 26_0001
+SCORE:    -351.204     0.000 -1199.193   346.602  -412.284        2.859              58.053             111.316             857.569     -27.587     -10.737     -26.084    -104.357             0.000     -41.986      45.156              0.000            -39.868     0.947      52.665      34.713         1.011 27_0001
+SCORE:     -63.139     0.000 -1183.362   437.945  -359.597        3.001              63.163             167.956             849.597     -16.200     -10.198     -11.714     -98.806             0.000     -37.274      54.636              0.000            -30.444     1.199      70.424      33.956         2.578 28_0001
+SCORE:    -335.090     0.000 -1200.665   349.571  -411.538        2.845              60.905             110.976             852.022     -24.997     -10.225     -25.962    -105.186             0.000     -40.279      45.647              0.000            -37.177     0.940      61.787      33.956         2.289 29_0001
+SCORE:    -341.437     0.000 -1204.703   367.919  -433.213        2.882              62.599             110.782             869.226     -32.398     -10.776     -32.091    -103.405             0.000     -36.896      45.896              0.000            -40.535     1.139      56.289      34.713         1.134 3_0001
+SCORE:    -329.538     0.000 -1196.312   349.175  -409.410        2.879              60.519             111.942             850.546     -23.817     -10.255     -25.920    -105.223             0.000     -40.749      46.577              0.000            -38.085     0.918      60.834      34.713         2.130 30_0001
+SCORE:     -64.338     0.000 -1177.656   448.706  -379.951        3.307              63.285             169.316             848.774     -20.458     -10.566     -23.141     -96.028             0.000     -28.316      52.745              0.000            -28.589     1.199      77.141      33.956         1.939 4_0001
+SCORE:    -328.204     0.000 -1202.602   367.579  -416.254        2.979              61.384             112.201             856.020     -28.636     -10.626     -28.908    -101.838             0.000     -36.994      43.423              0.000            -39.332     1.177      56.767      33.956         1.500 5_0001
+SCORE:    -315.021     0.000 -1197.239   367.237  -410.613        3.080              61.722             113.781             851.194     -28.238     -10.545     -28.763    -101.227             0.000     -36.106      44.407              0.000            -39.545     1.173      58.448      34.713         1.500 6_0001
+SCORE:    -101.755     0.000 -1178.948   435.900  -370.458        3.042              60.699             145.568             849.376     -17.522     -10.731     -16.036    -100.652             0.000     -35.288      53.910              0.000            -31.592     1.199      73.708      33.956         2.113 7_0001
+SCORE:    -339.488     0.000 -1208.535   356.086  -418.679        2.843              59.677             112.233             864.212     -25.646     -10.713     -26.149    -105.296             0.000     -38.945      45.839              0.000            -40.132     1.157      56.898      33.956         1.706 8_0001
+SCORE:    -330.198     0.000 -1203.171   357.857  -415.044        2.855              60.394             115.329             857.464     -26.470     -11.004     -24.580    -103.967             0.000     -40.327      46.621              0.000            -40.104     1.160      56.434      34.713         1.640 9_0001
